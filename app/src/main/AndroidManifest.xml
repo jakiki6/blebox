@@ -37,7 +37,10 @@
         android:theme="@style/Theme.BLEBox"
         tools:targetApi="31">
         <activity
-            android:name=".ActionMenu"
+            android:name=".EnumerateActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ActionMenuActivity"
             android:exported="false" />
         <activity
             android:name=".ArduinoSwitchActivity"

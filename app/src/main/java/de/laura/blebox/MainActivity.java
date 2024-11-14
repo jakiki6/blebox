@@ -66,7 +66,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @SuppressLint("MissingPermission")
     public void redraw() {
-        String text = devices.size() == 1 ? getResources().getString(R.string.log_1_device) : devices.size() + getResources().getString(R.string.log_n_devices);
+        if (devices == null) return;
+
+        String text = devices.size() == 1 ? getResources().getString(R.string.log_1_device) : devices.size() + " " + getResources().getString(R.string.log_n_devices);
         for (String addr : devices.keySet()) {
             text += addr + ": " + devices.get(addr).getName() + "\n";
         }
@@ -108,6 +110,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         logView.setMovementMethod(new ScrollingMovementMethod());
 
         spinner = findViewById(R.id.main_device_spinner);
+
+        ensurePermissions();
     }
 
     @SuppressLint("MissingPermission")
@@ -144,8 +148,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     String uuid = uuidParts[uuidParts.length - 1];
 
                     BluetoothDevice dev = devices.get(uuid);
-                    ActionMenu.dev = dev;
-                    Intent intent = new Intent(this, ArduinoSwitchActivity.class);
+                    ActionMenuActivity.dev = dev;
+                    Intent intent = new Intent(this, ActionMenuActivity.class);
                     startActivity(intent);
                 }
             }

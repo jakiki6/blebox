@@ -8,31 +8,27 @@ import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.os.Bundle;
-import android.widget.CompoundButton;
+import android.os.Handler;
+import android.os.Looper;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SwitchCompat;
 
-import java.util.UUID;
-
-public class ArduinoSwitchActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
+public class EnumerateActivity extends AppCompatActivity {
     BluetoothGatt gatt;
-    BluetoothGattCharacteristic characteristic;
-    public SwitchCompat switch1;
 
-    public static final UUID SERVICE_UUID = UUID.fromString("0000ffe0-0000-1000-8000-00805f9b34fb");
-    public static final UUID CHARACTERISTIC_UUID = UUID.fromString("0000ffe1-0000-1000-8000-00805f9b34fb");
+    TextView log;
 
-    @SuppressLint("MissingPermission")
+    @SuppressLint({"MissingPermission", "MissingInflatedId"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_switch);
+        setContentView(R.layout.activity_enumerate);
 
-        switch1 = findViewById(R.id.switch_switch);
-        switch1.setOnCheckedChangeListener(this);
+        log = findViewById(R.id.enumerate_log);
 
-        gatt =  dev.connectGatt(this, true, new BluetoothGattCallback() {
+        gatt = dev.connectGatt(this, true, new BluetoothGattCallback() {
             @Override
             public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
                 super.onConnectionStateChange(gatt, status, newState);
@@ -51,23 +47,21 @@ public class ArduinoSwitchActivity extends AppCompatActivity implements Compound
                 super.onServicesDiscovered(gatt, status);
 
                 if (status == BluetoothGatt.GATT_SUCCESS) {
-                    BluetoothGattService service =  gatt.getService(SERVICE_UUID);
-                    if (service == null) return;
+                    StringBuilder text = new StringBuilder(getResources().getString(R.string.discovered_services) + "\n");
+                    for (BluetoothGattService service : gatt.getServices()) {
+                        text.append(service.getUuid().toString()).append(":\n");
 
-                    characteristic =  service.getCharacteristic(CHARACTERISTIC_UUID);
+                        for (BluetoothGattCharacteristic characteristic : service.getCharacteristics()) {
+                            text.append("    ").append(characteristic.getUuid()).append("\n");
+                        }
+                    }
+
+                    System.out.println(text);
+                    new Handler(Looper.getMainLooper()).post(() -> log.setText(text.toString()));
                 }
             }
         });
 
         gatt.connect();
-    }
-
-    @SuppressLint("MissingPermission")
-    @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if (buttonView.getId() == switch1.getId()) {
-            characteristic.setValue(isChecked ? "1" : "0");
-            gatt.writeCharacteristic(characteristic);
-        }
     }
 }

@@ -8,5 +8,7 @@
     <string name="no_bt_scanner">Cannot obtain Bluetooth scanner!</string>
     <string name="ble_unsupported">BLE is not supported</string>
     <string name="log_1_device">1 device:\n\n</string>
-    <string name="log_n_devices"> device:\n\n</string>
+    <string name="log_n_devices">devices:\n\n</string>
+    <string name="discovered_services">Discovered services:</string>
+    <string name="action_enumerate">Device enumeration</string>
 </resources>
