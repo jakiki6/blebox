@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "BLE Test"
+rootProject.name = "BLEBox"
 include ':app'

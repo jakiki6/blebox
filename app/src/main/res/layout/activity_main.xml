@@ -2,46 +2,46 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+    android:id="@+id/switch_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/bscan"
+        android:id="@+id/main_scan"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Start Scan"
+        android:text="@string/start_scan"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/select"
+        app:layout_constraintEnd_toStartOf="@+id/main_select"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/select"
+        android:id="@+id/main_select"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Select"
+        android:text="@string/select_device"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/bscan" />
+        app:layout_constraintStart_toEndOf="@+id/main_scan" />
 
     <TextView
-        android:id="@+id/logView"
+        android:id="@+id/main_log_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:scrollbars="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/spinner"
+        app:layout_constraintBottom_toTopOf="@+id/main_device_spinner"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Spinner
-        android:id="@+id/spinner"
+        android:id="@+id/main_device_spinner"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/bscan"
+        android:layout_height="48dp"
+        app:layout_constraintBottom_toTopOf="@+id/main_scan"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/logView" />
+        app:layout_constraintTop_toBottomOf="@+id/main_log_view" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
