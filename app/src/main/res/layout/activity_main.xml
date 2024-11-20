@@ -10,10 +10,11 @@
     <Button
         android:id="@+id/main_scan"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:text="@string/start_scan"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/main_select"
+        app:layout_constraintTop_toTopOf="@+id/main_select"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
@@ -22,8 +23,18 @@
         android:layout_height="wrap_content"
         android:text="@string/select_device"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/main_checkbox"
         app:layout_constraintStart_toEndOf="@+id/main_scan" />
+
+    <CheckBox
+        android:id="@+id/main_checkbox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/include_unnamed"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/main_select"
+        app:layout_constraintStart_toEndOf="@+id/main_select" />
 
     <TextView
         android:id="@+id/main_log_view"

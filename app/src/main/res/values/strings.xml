@@ -11,4 +11,5 @@
     <string name="log_n_devices">devices:\n\n</string>
     <string name="discovered_services">Discovered services:</string>
     <string name="action_enumerate">Device enumeration</string>
+    <string name="include_unnamed">Include unnamed</string>
 </resources>

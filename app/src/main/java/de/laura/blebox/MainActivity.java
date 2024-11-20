@@ -17,6 +17,7 @@ import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,7 +32,8 @@ import java.util.stream.Collectors;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     Button bscan, select;
     TextView logView;
-    Spinner spinner;
+    Spinner deviceSelectionSpinner;
+    CheckBox includeUnnamed;
 
     HashMap<String, BluetoothDevice> devices;
 
@@ -44,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             super.onScanResult(callbackType, result);
 
             BluetoothDevice dev = result.getDevice();
-            if (dev.getName() == null) return;
+            if (dev.getName() == null && !includeUnnamed.isChecked()) return;
             devices.put(dev.getAddress(), dev);
 
             redraw();
@@ -70,19 +72,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         String text = devices.size() == 1 ? getResources().getString(R.string.log_1_device) : devices.size() + " " + getResources().getString(R.string.log_n_devices);
         for (String addr : devices.keySet()) {
-            text += addr + ": " + devices.get(addr).getName() + "\n";
+            text += addr + (devices.get(addr).getName() == null ? "" : ": " + devices.get(addr).getName()) + "\n";
         }
         logView.setText(text);
 
-        String puuid = (String) spinner.getSelectedItem();
+        String puuid = (String) deviceSelectionSpinner.getSelectedItem();
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getBaseContext(), androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, devices.keySet().stream().map(uuid -> devices.get(uuid).getName() + " " + uuid).collect(Collectors.toSet()).toArray(new String[]{}));
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getBaseContext(), androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, devices.keySet().stream().map(uuid -> (devices.get(uuid).getName() == null ? "" : devices.get(uuid).getName() + " ") + uuid).collect(Collectors.toSet()).toArray(new String[]{}));
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
+        deviceSelectionSpinner.setAdapter(adapter);
 
         if (puuid != null) {
             for (int i = 0; i < devices.size(); i++) {
-                if (puuid.equals(spinner.getItemAtPosition(i))) spinner.setSelection(i);
+                if (puuid.equals(deviceSelectionSpinner.getItemAtPosition(i))) deviceSelectionSpinner.setSelection(i);
             }
         }
     }
@@ -109,7 +111,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         logView = findViewById(R.id.main_log_view);
         logView.setMovementMethod(new ScrollingMovementMethod());
 
-        spinner = findViewById(R.id.main_device_spinner);
+        deviceSelectionSpinner = findViewById(R.id.main_device_spinner);
+
+        includeUnnamed = findViewById(R.id.main_checkbox);
 
         ensurePermissions();
     }
@@ -129,6 +133,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (bluetoothLeScanner == null) {
             Toast.makeText(this, R.string.no_bt_scanner, Toast.LENGTH_SHORT).show();
+            return;
         }
 
         scanning = true;
@@ -143,8 +148,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (v.getId() == bscan.getId()) {
                 toggleScan();
             } else if (v.getId() == select.getId()) {
-                if (spinner.getSelectedItemPosition() != -1) {
-                    String[] uuidParts = ((String) spinner.getSelectedItem()).split(" ");
+                if (deviceSelectionSpinner.getSelectedItemPosition() != -1) {
+                    String[] uuidParts = ((String) deviceSelectionSpinner.getSelectedItem()).split(" ");
                     String uuid = uuidParts[uuidParts.length - 1];
 
                     BluetoothDevice dev = devices.get(uuid);
