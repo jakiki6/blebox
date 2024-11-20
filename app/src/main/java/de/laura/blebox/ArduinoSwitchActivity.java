@@ -9,6 +9,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.os.Bundle;
 import android.widget.CompoundButton;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
@@ -22,7 +23,6 @@ public class ArduinoSwitchActivity extends AppCompatActivity implements Compound
 
     public static final UUID SERVICE_UUID = UUID.fromString("0000ffe0-0000-1000-8000-00805f9b34fb");
     public static final UUID CHARACTERISTIC_UUID = UUID.fromString("0000ffe1-0000-1000-8000-00805f9b34fb");
-
     @SuppressLint("MissingPermission")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +66,11 @@ public class ArduinoSwitchActivity extends AppCompatActivity implements Compound
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (buttonView.getId() == switch1.getId()) {
+            if (characteristic == null) {
+                Toast.makeText(this, R.string.service_not_connected, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             characteristic.setValue(isChecked ? "1" : "0");
             gatt.writeCharacteristic(characteristic);
         }
