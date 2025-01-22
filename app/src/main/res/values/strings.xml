@@ -13,4 +13,7 @@
     <string name="action_enumerate">Device enumeration</string>
     <string name="include_unnamed">Include unnamed</string>
     <string name="service_not_connected">Service not connected</string>
+    <string name="sensor_not_found">Orientation sensor could not be found</string>
+    <string name="action_tilt">Arduino Tilt</string>
+    <string name="connected">Connected</string>
 </resources>

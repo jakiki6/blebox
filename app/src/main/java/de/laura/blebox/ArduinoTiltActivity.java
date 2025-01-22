@@ -7,21 +7,33 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.app.ActivityCompat;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
-public class ArduinoSwitchActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
+public class ArduinoTiltActivity extends AppCompatActivity implements SensorEventListener {
     BluetoothGatt gatt;
     BluetoothGattCharacteristic characteristic;
-    public SwitchCompat switch1;
+    SensorManager sensorManager;
+    Sensor rot;
 
     public static final UUID SERVICE_UUID = UUID.fromString("0000ffe0-0000-1000-8000-00805f9b34fb");
     public static final UUID CHARACTERISTIC_UUID = UUID.fromString("0000ffe1-0000-1000-8000-00805f9b34fb");
@@ -29,10 +41,15 @@ public class ArduinoSwitchActivity extends AppCompatActivity implements Compound
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_switch);
+        setContentView(R.layout.activity_tilt);
 
-        switch1 = findViewById(R.id.switch_switch);
-        switch1.setOnCheckedChangeListener(this);
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        if (sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) == null) {
+            Toast.makeText(this, R.string.sensor_not_found, Toast.LENGTH_SHORT).show();
+            finish();
+        }
+
+        rot = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
         gatt =  dev.connectGatt(this, true, new BluetoothGattCallback() {
             @Override
@@ -65,7 +82,7 @@ public class ArduinoSwitchActivity extends AppCompatActivity implements Compound
                 super.onCharacteristicChanged(gatt, characteristic, value);
 
                 if (characteristic.getService().getUuid().equals(SERVICE_UUID) && characteristic.getUuid().equals(CHARACTERISTIC_UUID)) {
-                    Toast.makeText(ArduinoSwitchActivity.this, "Text: " + new String(value, StandardCharsets.UTF_8), Toast.LENGTH_SHORT).show();
+                    // handle value
                 }
             }
         });
@@ -73,17 +90,41 @@ public class ArduinoSwitchActivity extends AppCompatActivity implements Compound
         gatt.connect();
     }
 
-    @SuppressLint("MissingPermission")
     @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if (buttonView.getId() == switch1.getId()) {
-            if (characteristic == null) {
-                Toast.makeText(this, R.string.service_not_connected, Toast.LENGTH_SHORT).show();
-                return;
-            }
+    protected void onResume() {
+        super.onResume();
+        sensorManager.registerListener(this, rot, SensorManager.SENSOR_DELAY_NORMAL);
+    }
 
-            characteristic.setValue(isChecked ? "1" : "0");
-            gatt.writeCharacteristic(characteristic);
+    @Override
+    protected void onPause() {
+        super.onPause();
+        sensorManager.unregisterListener(this);
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (characteristic == null) return;
+
+        if (event.sensor == rot) {
+            float[] rotationVector = event.values;
+            float[] rotationMatrix = new float[9];
+            SensorManager.getRotationMatrixFromVector(rotationMatrix, rotationVector);
+
+            float[] orientation = new float[3];
+
+            SensorManager.getOrientation(rotationMatrix, orientation);
+
+            byte r = (byte) ((Math.toDegrees(orientation[1]) + 90) / 360 * 255);
+            characteristic.setValue(new byte[]{r});
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
+                gatt.writeCharacteristic(characteristic);
+            }
         }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
     }
 }
